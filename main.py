@@ -3,6 +3,7 @@ import math
 import os
 import tempfile
 import zlib
+from pathlib import Path
 
 import webview
 from PIL import Image
@@ -60,7 +61,7 @@ class Api:
             
         compressed = zlib.compress(data, level=6)
         name_bytes = filename.encode('utf-8')
-        header = bytearray(b'D2I') + len(name_bytes).to_bytes(1, 'big') + name_bytes + len(data).to_bytes(4, 'big')
+        header = bytearray(b'F2P') + len(name_bytes).to_bytes(1, 'big') + name_bytes + len(data).to_bytes(4, 'big')
         combined = header + compressed
         
         side = math.ceil(math.sqrt(math.ceil(len(combined) / 4)))
@@ -87,7 +88,7 @@ class Api:
         try:
             img = Image.open(path).convert('RGBA')
             bytes_data = img.tobytes()
-            if bytes_data[:3] != b'D2I': 
+            if bytes_data[:3] != b'F2P': 
                 return {'success': False, 'message': 'Invalid File 2 PNG file.'}
                 
             n_len = bytes_data[3]
@@ -119,11 +120,12 @@ if __name__ == '__main__':
         current_dir = os.path.dirname(os.path.abspath(__file__))
         
     html_file = os.path.join(current_dir, 'index.html')
+    url = Path(html_file).as_uri()
     
     # Launch pywebview window pointing to our new modern UI
     window = webview.create_window(
         'File 2 PNG',
-        url=f'file:///{html_file}'.replace('\\', '/'),
+        url=url,
         js_api=api,
         width=590,
         height=450,
