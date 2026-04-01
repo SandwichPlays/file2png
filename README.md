@@ -56,14 +56,3 @@ pyinstaller main.spec
 ```
 
 The resulting executable will be found in the `dist/` folder.
-
-## 🐧 Linux Troubleshooting
-
-If the application fails to start on Linux, ensure you have the necessary GTK and WebKit libraries installed:
-
-```bash
-# Ubuntu/Debian
-sudo apt-get install python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.0
-```
-
-If you see a `ModuleNotFoundError: No module named 'gi'` error, it means the system's GObject Introspection bindings are missing or the bundled version is incompatible with your system's libraries.
