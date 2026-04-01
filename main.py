@@ -6,11 +6,19 @@ import zlib
 import ctypes
 import sys
 
-try:
-    if sys.platform == 'linux':
+# Linux-specific initialization for multi-threaded GUI and version locking
+if sys.platform == 'linux':
+    try:
+        # Prevent threading deadlocks by initializing X11 threads
         ctypes.CDLL('libX11.so.6').XInitThreads()
-except Exception:
-    pass
+        
+        # Explicitly lock versions to prevent WebKit/GTK version mismatch hangs
+        import gi
+        gi.require_version('Gtk', '3.0')
+        gi.require_version('Gdk', '3.0')
+        gi.require_version('WebKit2', '4.1')
+    except Exception as e:
+        print(f"[ERROR] Linux Initialization failed: {e}")
 
 import webview
 from PIL import Image

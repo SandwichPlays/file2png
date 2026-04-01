@@ -3,7 +3,14 @@ import sys
 
 hidden_imports = []
 if sys.platform == 'linux':
-    hidden_imports = ['gi', 'webview.platforms.gtk']
+    hidden_imports = [
+        'gi', 
+        'gi.repository.Gtk', 
+        'gi.repository.Gdk', 
+        'gi.repository.WebKit2', 
+        'gi.repository.Gio',
+        'webview.platforms.gtk'
+    ]
 
 
 a = Analysis(
