@@ -3,7 +3,6 @@ import math
 import os
 import tempfile
 import zlib
-from pathlib import Path
 
 import webview
 from PIL import Image
@@ -120,12 +119,11 @@ if __name__ == '__main__':
         current_dir = os.path.dirname(os.path.abspath(__file__))
         
     html_file = os.path.join(current_dir, 'index.html')
-    url = Path(html_file).as_uri()
     
     # Launch pywebview window pointing to our new modern UI
     window = webview.create_window(
         'File 2 PNG',
-        url=url,
+        url=f'file:///{html_file}'.replace('\\', '/'),
         js_api=api,
         width=590,
         height=450,
