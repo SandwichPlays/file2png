@@ -3,6 +3,14 @@ import math
 import os
 import tempfile
 import zlib
+import ctypes
+import sys
+
+try:
+    if sys.platform == 'linux':
+        ctypes.CDLL('libX11.so.6').XInitThreads()
+except Exception:
+    pass
 
 import webview
 from PIL import Image
@@ -68,10 +76,16 @@ class Api:
         img.frombytes(combined + bytes((side * side * 4) - len(combined)))
         
         suggested_name = f"{filename}.f2p.png"
+        
+        # On Linux, use simpler filters to avoid toolkit hangs
+        f_types = ('PNG files (*.png)', 'All files (*.*)')
+        if sys.platform != 'linux':
+             f_types = ('Image Files (*.f2p.png;*.png)', 'All Files (*.*)')
+             
         save_result = self.window.create_file_dialog(
             webview.FileDialog.SAVE, 
             save_filename=suggested_name,
-            file_types=('Image Files (*.f2p.png;*.png)', 'All Files (*.*)')
+            file_types=f_types
         )
         
         if save_result and len(save_result) > 0:
