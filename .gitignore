@@ -1,0 +1,19 @@
+# Environments
+venv/
+env/
+.env
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+
+# Build directories
+build/
+dist/
+*.spec
+!main.spec
+
+# System files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File 2 PNG</title>
+    <style>
+        @font-face {
+            font-family: 'SF Pro';
+            src: url('./fonts/SF-Pro.ttf') format('truetype');
+            font-weight: 100 900;
+        }
+
+        :root {
+            --bg-base: #FFFFFF;
+            --element-bg: #F2F2F7;
+            --element-hover: #E5E5EA;
+            --accent: #007AFF;
+            --green: #34C759;
+            --green-text: #1F8D3B;
+            --red: #FF3B30;
+            --red-text: #C02C23;
+            --text-main: #000000;
+            --text-muted: #6C6C70;
+            --radius-main: 20px;
+            --radius-btn: 12px;
+        }
+
+        [data-theme="dark"] {
+            --bg-base: #1C1C1E;
+            --element-bg: #2C2C2E;
+            --element-hover: #3A3A3C;
+            --accent: #0A84FF;
+            --green: #30D158;
+            --green-text: #30D158;
+            --red: #FF453A;
+            --red-text: #FF453A;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            padding: 40px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: transparent;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.6px;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            margin: 0;
+            font-size: 15px;
+            color: var(--text-muted);
+            font-weight: 500;
+            letter-spacing: -0.2px;
+        }
+
+        .drop-zone {
+            flex: 1;
+            background: var(--element-bg);
+            border-radius: var(--radius-main);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            background: var(--element-hover);
+            transform: scale(1.01);
+        }
+
+
+        .drop-hint {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .file-name {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 85%;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 24px;
+            gap: 16px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 0;
+            border: none;
+            border-radius: var(--radius-btn);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-main);
+            background: var(--element-bg);
+            transition: all 0.2s ease;
+            letter-spacing: -0.2px;
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--element-hover);
+            transform: scale(1.02);
+        }
+
+        button:active:not(:disabled) {
+            transform: scale(0.96);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-auto.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+
+        .btn-auto.active:hover {
+            background: #006ce4;
+        }
+
+        .btn-encode {
+            color: var(--green-text);
+            background: rgba(52, 199, 89, 0.15);
+        }
+
+        .btn-encode:hover:not(:disabled) {
+            background: rgba(52, 199, 89, 0.25);
+        }
+
+        .btn-decode {
+            color: var(--red-text);
+            background: rgba(255, 59, 48, 0.12);
+        }
+
+        .btn-decode:hover:not(:disabled) {
+            background: rgba(255, 59, 48, 0.2);
+        }
+
+
+        /* Progress Bar */
+        .progress-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--element-hover);
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 30%;
+            height: 100%;
+            background: var(--accent);
+            border-radius: 4px;
+            animation: progress 1.5s infinite ease-in-out;
+            transform-origin: left;
+        }
+
+        @keyframes progress {
+            0% {
+                transform: translateX(-100%) scaleX(0.2);
+            }
+
+            50% {
+                transform: translateX(100%) scaleX(1);
+            }
+
+            100% {
+                transform: translateX(300%) scaleX(0.2);
+            }
+        }
+
+        .toast {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px) scale(0.9);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: none;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 99px;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            pointer-events: none;
+            letter-spacing: -0.2px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+
+        .theme-toggle:hover {
+            background: var(--element-bg);
+            color: var(--text-main);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container" id="main-container">
+        <div class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+            <svg id="moon-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            <svg id="sun-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container" id="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+
+        <div class="header">
+            <h1>File 2 PNG</h1>
+            <div class="subtitle">Turn ANY file into a PNG and back!</div>
+        </div>
+
+        <div class="drop-zone" id="drop-zone" onclick="selectFile()">
+            <div class="drop-hint" id="drop-hint">Click or drop a file</div>
+            <div class="file-name" id="file-name">None selected</div>
+        </div>
+
+        <div class="actions">
+            <button class="btn-auto" id="btn-auto" disabled onclick="execute('Auto')">Auto</button>
+            <button class="btn-encode" id="btn-encode" disabled onclick="execute('Encode')">Encode</button>
+            <button class="btn-decode" id="btn-decode" disabled onclick="execute('Decode')">Decode</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Ready</div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const hint = document.getElementById('drop-hint');
+        const fileNameLabel = document.getElementById('file-name');
+
+        const btnAuto = document.getElementById('btn-auto');
+        const btnEncode = document.getElementById('btn-encode');
+        const btnDecode = document.getElementById('btn-decode');
+
+        const progressContainer = document.getElementById('progress-container');
+
+        let currentPath = null;
+        let currentName = null;
+
+        // Theme Initialization
+        const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.body.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const moonIcon = document.getElementById('moon-icon');
+            const sunIcon = document.getElementById('sun-icon');
+            if (theme === 'dark') {
+                moonIcon.style.display = 'none';
+                sunIcon.style.display = 'block';
+            } else {
+                moonIcon.style.display = 'block';
+                sunIcon.style.display = 'none';
+            }
+        }
+
+        async function selectFile() {
+            if (window.pywebview && window.pywebview.api) {
+                const result = await window.pywebview.api.select_file();
+                if (result && result.path) {
+                    setFile(result.path, result.name);
+                }
+            } else {
+                showToast("API not ready");
+            }
+        }
+
+        async function execute(mode) {
+            if (!currentPath || !window.pywebview || !window.pywebview.api) return;
+
+            setLoading(true);
+            try {
+                // Allows Python to crunch data without completely freezing animation
+                const response = await window.pywebview.api.execute(mode, currentPath);
+                if (response.success) {
+                    showToast(response.message);
+                    resetUI();
+                } else {
+                    showToast(response.message);
+                }
+            } catch (error) {
+                showToast("An error occurred.");
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function setFile(path, name) {
+            currentPath = path;
+            currentName = name;
+            fileNameLabel.textContent = name;
+
+            hint.textContent = "Ready to process";
+            hint.style.color = "var(--accent)";
+
+            btnAuto.disabled = false;
+            btnEncode.disabled = false;
+            btnDecode.disabled = false;
+            btnAuto.classList.add('active');
+        }
+
+        function resetUI() {
+            currentPath = null;
+            currentName = null;
+            fileNameLabel.textContent = "None selected";
+            fileNameLabel.style.color = "var(--text-muted)";
+            hint.textContent = "Click or drop a file";
+            hint.style.color = "var(--text-main)";
+
+            btnAuto.disabled = true;
+            btnEncode.disabled = true;
+            btnDecode.disabled = true;
+            btnAuto.classList.remove('active');
+        }
+
+        function setLoading(loading) {
+            btnAuto.disabled = loading;
+            btnEncode.disabled = loading;
+            btnDecode.disabled = loading;
+
+            if (loading) {
+                progressContainer.style.display = 'block';
+                showToast("Processing...");
+            } else {
+                progressContainer.style.display = 'none';
+            }
+        }
+
+        let toastTimeout;
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+            e.dataTransfer.dropEffect = 'copy';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+
+            if (e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                if (file.path) {
+                    setFile(file.path, file.name);
+                } else {
+                    setLoading(true);
+                    const reader = new FileReader();
+                    reader.onload = async function (event) {
+                        if (window.pywebview && window.pywebview.api) {
+                            const base64Data = event.target.result;
+                            const result = await window.pywebview.api.set_file_content(file.name, base64Data);
+                            if (result && result.path) {
+                                setFile(result.path, result.name);
+                            } else {
+                                showToast("Failed to read dropped file");
+                            }
+                        }
+                        setLoading(false);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+
+    </script>
+</body>
+
+</html>
