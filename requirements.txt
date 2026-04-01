@@ -1,4 +1,5 @@
 pyinstaller
-pywebview
 pillow
-PyGObject
+pywebview; sys_platform != 'linux'
+pywebview[gtk]; sys_platform == 'linux'
+PyGObject; sys_platform == "linux"

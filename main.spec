@@ -1,4 +1,9 @@
 # -*- mode: python ; coding: utf-8 -*-
+import sys
+
+hidden_imports = []
+if sys.platform == 'linux':
+    hidden_imports = ['gi', 'webview.platforms.gtk']
 
 
 a = Analysis(
@@ -6,7 +11,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[('index.html', '.'), ('fonts', 'fonts'), ('favicon.ico', '.')],
-    hiddenimports=['gi', 'webview.platforms.gtk'],
+    hiddenimports=hidden_imports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
