@@ -429,6 +429,7 @@
                 <div class="header">
                     <h1>File 2 PNG</h1>
                     <div class="subtitle">Turn ANY file into a PNG and back!</div>
+                    <div class="subtitle">Auto mode decodes if file has .f2p.png extension, otherwise encodes</div>
                 </div>
 
                 <div class="drop-zone" id="drop-zone" onclick="selectFile()">
@@ -534,33 +535,33 @@
         async function runEncode(file) {
             const arrayBuffer = await file.arrayBuffer();
             const data = new Uint8Array(arrayBuffer);
-            
+
             // Step 1: Compress the core data using fflate (same as Python logic)
             const compressed = fflate.zlibSync(data, { level: 6 });
-            
+
             // Step 2: Build the 'F2P' header (3 bytes Magic + 1 byte NameLen + Name + 4 bytes OrigSize)
             const nameBytes = new TextEncoder().encode(file.name);
             const header = new Uint8Array(3 + 1 + nameBytes.length + 4);
             header.set([70, 50, 80]); // "F2P"
             header[3] = nameBytes.length;
             header.set(nameBytes, 4);
-            
+
             const view = new DataView(header.buffer);
             view.setUint32(4 + nameBytes.length, data.length, false); // Big Endian
-            
+
             // Step 3: Combine Header + Compressed Data
             const combined = new Uint8Array(header.length + compressed.length);
             combined.set(header);
             combined.set(compressed, header.length);
-            
+
             // Step 4: Calculate dimensions for 4-channel RGBA (Same as Python's Pillow logic)
             const totalPixels = Math.ceil(combined.length / 4);
             const side = Math.ceil(Math.sqrt(totalPixels));
-            
+
             // Step 5: Map raw bits to RGBA pixels (Lossless manual mapping)
             const rgba = new Uint8Array(side * side * 4);
             rgba.set(combined);
-            
+
             // Step 6: Use UPNG.js to encode a lossless, unpremultiplied PNG
             const pngBuffer = UPNG.encode([rgba.buffer], side, side, 0); // 0 = lossless conversion
             const blob = new Blob([pngBuffer], { type: 'image/png' });
@@ -569,21 +570,21 @@
 
         async function runDecode(file) {
             const arrayBuffer = await file.arrayBuffer();
-            
+
             // Step 1: Manually decode the PNG to raw bits (Avoids Canvas premultiplication corruption)
             const img = UPNG.decode(arrayBuffer);
             const bytes = new Uint8Array(UPNG.toRGBA8(img)[0]);
-            
+
             // Step 2: Check 'F2P' Magic Header
             if (bytes[0] !== 70 || bytes[1] !== 50 || bytes[2] !== 80) { // "F2P"
-                throw new Error("Invalid File 2 PNG file.");
+                throw new Error("Invalid file.");
             }
-            
+
             // Step 3: Extract Name and Compressed Data
             const nameLen = bytes[3];
             const name = new TextDecoder().decode(bytes.slice(4, 4 + nameLen));
             const compressed = bytes.slice(4 + nameLen + 4);
-            
+
             // Step 4: Decompress (fflate handles trailing padding from the image automatically)
             const decompressed = fflate.unzlibSync(compressed);
             const blob = new Blob([decompressed]);
