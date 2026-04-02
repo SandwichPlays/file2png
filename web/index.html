@@ -590,7 +590,28 @@
             download(blob, name);
         }
 
-        function download(blob, name) {
+        async function download(blob, name) {
+            // 1. Modern way: Show a "Save As" dialog (Chrome, Edge, etc.)
+            if ('showSaveFilePicker' in window) {
+                try {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: name,
+                        types: [{
+                            description: 'File 2 PNG Image',
+                            accept: { 'image/png': ['.png'] }
+                        }],
+                    });
+                    const writable = await handle.createWritable();
+                    await writable.write(blob);
+                    await writable.close();
+                    return; // Success!
+                } catch (err) {
+                    if (err.name === 'AbortError') return; // User cancelled, don't fallback
+                    console.error('File System Access API failed, falling back...', err);
+                }
+            }
+
+            // 2. Fallback way: Automatic download (Safari, Firefox, or failures)
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
