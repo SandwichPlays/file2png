@@ -1,6 +1,7 @@
 # 🖼️ File 2 PNG (f2p)
 
 **File 2 PNG** is a minimal desktop application designed for lossless file-to-png conversion. It allows you to transform any file—be it a document, archive, or executable—into a valid PNG image and back again with absolute data integrity.
+**Try it out!:**
 
 ![File 2 PNG Header](https://raw.githubusercontent.com/SandwichPlays/file2png/main/favicon.ico)
 
@@ -29,6 +30,13 @@
 - [pywebview](https://pywebview.flowrl.com/)
 
 ### Installation
+**Method 1: Using the .exe (Windows only)**
+
+1.  Download the .exe program from the [releases](https://github.com/SandwichPlays/file2png/releases) page.
+
+2.  Run the program.
+
+**Method 2: Using the source code**
 
 1.  Clone the repository:
     ```bash
