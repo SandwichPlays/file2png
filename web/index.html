@@ -387,6 +387,8 @@
             }
         }
     </style>
+    <script src="https://unpkg.com/pako@latest/dist/pako.min.js"></script>
+    <script src="https://unpkg.com/upng-js@latest/UPNG.js"></script>
     <script src="https://unpkg.com/fflate"></script>
 </head>
 
@@ -532,68 +534,57 @@
         async function runEncode(file) {
             const arrayBuffer = await file.arrayBuffer();
             const data = new Uint8Array(arrayBuffer);
-
-            // Compress using fflate (zlib format)
+            
+            // Step 1: Compress the core data using fflate (same as Python logic)
             const compressed = fflate.zlibSync(data, { level: 6 });
-
+            
+            // Step 2: Build the 'F2P' header (3 bytes Magic + 1 byte NameLen + Name + 4 bytes OrigSize)
             const nameBytes = new TextEncoder().encode(file.name);
             const header = new Uint8Array(3 + 1 + nameBytes.length + 4);
             header.set([70, 50, 80]); // "F2P"
             header[3] = nameBytes.length;
             header.set(nameBytes, 4);
-
+            
             const view = new DataView(header.buffer);
             view.setUint32(4 + nameBytes.length, data.length, false); // Big Endian
-
+            
+            // Step 3: Combine Header + Compressed Data
             const combined = new Uint8Array(header.length + compressed.length);
             combined.set(header);
             combined.set(compressed, header.length);
-
+            
+            // Step 4: Calculate dimensions for 4-channel RGBA (Same as Python's Pillow logic)
             const totalPixels = Math.ceil(combined.length / 4);
             const side = Math.ceil(Math.sqrt(totalPixels));
-
-            const canvas = document.createElement('canvas');
-            canvas.width = side;
-            canvas.height = side;
-            const ctx = canvas.getContext('2d');
-            const imageData = ctx.createImageData(side, side);
-
-            // Data to RGBA
-            const pixelData = new Uint8ClampedArray(side * side * 4);
-            pixelData.set(combined);
-            imageData.data.set(pixelData);
-            ctx.putImageData(imageData, 0, 0);
-
-            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            
+            // Step 5: Map raw bits to RGBA pixels (Lossless manual mapping)
+            const rgba = new Uint8Array(side * side * 4);
+            rgba.set(combined);
+            
+            // Step 6: Use UPNG.js to encode a lossless, unpremultiplied PNG
+            const pngBuffer = UPNG.encode([rgba.buffer], side, side, 0); // 0 = lossless conversion
+            const blob = new Blob([pngBuffer], { type: 'image/png' });
             download(blob, file.name + ".f2p.png");
         }
 
         async function runDecode(file) {
-            const img = new Image();
-            img.src = URL.createObjectURL(file);
-            await new Promise((resolve, reject) => {
-                img.onload = resolve;
-                img.onerror = reject;
-            });
-
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-            const imageData = ctx.getImageData(0, 0, img.width, img.height);
-            const bytes = imageData.data;
-
+            const arrayBuffer = await file.arrayBuffer();
+            
+            // Step 1: Manually decode the PNG to raw bits (Avoids Canvas premultiplication corruption)
+            const img = UPNG.decode(arrayBuffer);
+            const bytes = new Uint8Array(UPNG.toRGBA8(img)[0]);
+            
+            // Step 2: Check 'F2P' Magic Header
             if (bytes[0] !== 70 || bytes[1] !== 50 || bytes[2] !== 80) { // "F2P"
                 throw new Error("Invalid File 2 PNG file.");
             }
-
+            
+            // Step 3: Extract Name and Compressed Data
             const nameLen = bytes[3];
             const name = new TextDecoder().decode(bytes.slice(4, 4 + nameLen));
             const compressed = bytes.slice(4 + nameLen + 4);
-
-            // Decompress using fflate
-            // fflate.unzlibSync will stop at the end of the zlib stream, ignoring the padding
+            
+            // Step 4: Decompress (fflate handles trailing padding from the image automatically)
             const decompressed = fflate.unzlibSync(compressed);
             const blob = new Blob([decompressed]);
             download(blob, name);
