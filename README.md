@@ -48,7 +48,7 @@
 
 ## 📦 Building from Source
 
-To create a standalone executable for your operating system (still in development), use [PyInstaller](https://pyinstaller.org/):
+To create a standalone executable for your operating system (currently windows only), use [PyInstaller](https://pyinstaller.org/):
 
 ```bash
 pip install pyinstaller
