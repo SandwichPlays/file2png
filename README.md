@@ -2,7 +2,7 @@
 
 **File 2 PNG** is a minimal desktop application designed for lossless file-to-png conversion. It allows you to transform any file—be it a document, archive, or executable—into a valid PNG image and back again with absolute data integrity.
 
-**[Try it out here!](https://raw.githubusercontent.com/SandwichPlays/file2png/main/favicon.ico)**
+**[Try it out here!](https://file2png.vercel.app)**
 
 ![File 2 PNG Header](https://raw.githubusercontent.com/SandwichPlays/file2png/main/favicon.ico)
 
