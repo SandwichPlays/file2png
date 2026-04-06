@@ -1,66 +1,39 @@
-# 🖼️ File 2 PNG (f2p)
+# 🖼️ File 2 PNG (f2p) - Turbo Web Edition
 
-**File 2 PNG** is a minimal desktop application designed for lossless file-to-png conversion. It allows you to transform any file—be it a document, archive, or executable—into a valid PNG image and back again with absolute data integrity.
-**Try it out!:**
+**File 2 PNG** is a minimal, high-performance web application designed for lossless file-to-PNG conversion. It allows you to transform any file—be it a document, archive, or executable—into a valid PNG image and back again with absolute data integrity, all directly in your browser.
 
-![File 2 PNG Header](https://raw.githubusercontent.com/SandwichPlays/file2png/main/favicon.ico)
+> [!IMPORTANT]
+> This version uses a custom, manual PNG encoding engine implemented in a **Web Worker** to handle large files (100MB+) without crashing or slowing down the UI.
 
 ## ✨ Features
 
-- **🚀 Lossless Conversion**: 100% data integrity using byte-perfect mapping to RGBA channels.
-- **📦 Smart Compression**: Integrated Zlib (level 6) compression to keep your PNG-encapsulated files as small as possible.
-- **🎨 Modern minimal UI**: A clean interface built for focus and ease of use.
-- **🌙 Native light/dark Mode**: Full support for both light and dark themes
-- **🖱️ Drag & Drop**: Simple file handling, just drag a file into the window to get started.
-- **⚡ Fast Processing**: Efficient Python backend powered by `pywebview` and `Pillow`.
+- **🚀 Stable Large-File Support**: Process 100MB+ files smoothly thanks to background worker threading.
+- **📦 Bit-Perfect Manual Engine**: A custom PNG construction engine (IHDR, IDAT, IEND) that bypasses the lossy HTML5 Canvas API.
+- **🎨 Apple-Inspired Aesthetic**: A clean, minimalist interface using the SF Pro font family.
+- **🌙 System Theme Detection**: Automatically defaults to your device's Light or Dark mode.
+- **鼠标 🖱️ Drag & Drop**: Simple file handling—just drag a file into the window to get started.
+- **⚡ Fully Offline & Private**: No data ever leaves your computer. Everything happens locally via `fflate`.
 
 ## 🛠️ How it Works
 
-1.  **Header**: The app attaches a custom binary header (`F2P`) containing the original filename and size metadata.
-2.  **Compression**: The raw data is compressed using the DEFLATE algorithm (Zlib).
+1.  **Header**: The app attaches a custom binary header (`F2P`) containing the original filename and original/compressed size metadata.
+2.  **Compression**: Raw data is compressed using the DEFLATE algorithm (Zlib) via `fflate`.
 3.  **Pixel Mapping**: Each 4 bytes of compressed data are mapped to one RGBA pixel (Red, Green, Blue, Alpha).
-4.  **PNG Container**: The resulting pixel grid is saved as a standard PNG image. Because PNG is a lossless format, your data remains perfectly preserved.
+4.  **PNG Container**: The engine manually assembles the PNG chunks to ensure zero data corruption from browser "optimizations."
 
 ## 🚀 Getting Started
 
-### Prerequisites
+Simply open `index.html` in any modern web browser. 
 
-- Python 3.8+
-- [Pillow](https://python-pillow.org/)
-- [pywebview](https://pywebview.flowrl.com/)
+### Project Structure
+- `index.html`: The main entry point (structure).
+- `style.css`: Modern, responsive styling.
+- `script.js`: UI logic and Worker orchestration.
+- `worker.js`: The high-performance conversion engine.
+- `lib/fflate.js`: High-speed compression dependency.
 
-### Installation
-**Method 1: Using the .exe (Windows only)**
+## 📄 License
+This project is open-source and free to use.
 
-1.  Download the .exe program from the [releases](https://github.com/SandwichPlays/file2png/releases) page.
-
-2.  Run the program.
-
-**Method 2: Using the source code**
-
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/SandwichPlays/file2png.git
-    cd file2png
-    ```
-
-2.  Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-3.  Run the application:
-    ```bash
-    python main.py
-    ```
-
-## 📦 Building from Source
-
-To create a standalone executable for your operating system (currently windows only), use [PyInstaller](https://pyinstaller.org/):
-
-```bash
-pip install pyinstaller
-pyinstaller main.spec
-```
-
-The resulting executable will be found in the `dist/` folder.
+---
+Built with ❤️ for data integrity.
