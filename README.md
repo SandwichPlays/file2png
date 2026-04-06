@@ -1,6 +1,7 @@
 # 🖼️ File 2 PNG (f2p) - Turbo Web Edition
 
-**File 2 PNG** is a minimal, high-performance web application designed for lossless file-to-PNG conversion. It allows you to transform any file—be it a document, archive, or executable—into a valid PNG image and back again with absolute data integrity, all directly in your browser.
+**File 2 PNG** is a minimal desktop application designed for lossless file-to-png conversion. It allows you to transform any file—be it a document, archive, or executable—into a valid PNG image and back again with absolute data integrity.
+**Try it out!:**
 
 > [!IMPORTANT]
 > This version uses a custom, manual PNG encoding engine implemented in a **Web Worker** to handle large files (100MB+) without crashing or slowing down the UI.
